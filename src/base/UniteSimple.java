@@ -1,6 +1,8 @@
 package base;
 
+import design_patterns.visiteur.Visiteur;
 import exceptions.DimensionIllegaleException;
+import exceptions.UniteIllegaleException;
 
 public class UniteSimple extends Unite {
     double tauxConversion;
@@ -10,17 +12,19 @@ public class UniteSimple extends Unite {
     }
 
     public UniteSimple(String symbole, String nom, Dimension dimension, double taux) throws DimensionIllegaleException {
-        for (int i = 0; i < Dimension.SIZE; i++)
-            if (dimension.getVecteur()[i] > 1)
-                throw new DimensionIllegaleException("Erreur d'instanciation: Une unité simple n'a pas de valeur de dimension > 1.");
-        this.symbole = symbole;
-        this.nom = nom;
-        this.dimension = dimension;
+        if (!dimension.estSimple())
+            throw new DimensionIllegaleException("Erreur d'instanciation: Une unité simple n'a pas de valeur de dimension > 1.");
+        super(symbole, nom, dimension);
         this.tauxConversion = taux;
     }
 
     @Override
     public double getTauxConversion() {
         return this.tauxConversion;
+    }
+
+    @Override
+    public void accepteVisiteur(Visiteur visiteur) throws UniteIllegaleException {
+        visiteur.visite(this);
     }
 }

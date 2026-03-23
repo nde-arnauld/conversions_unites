@@ -1,24 +1,104 @@
 package base;
 
+import exceptions.UniteIllegaleException;
+
 import java.util.Arrays;
 
 public class Dimension {
     public static int SIZE = 8;
-    private int[] vecteur;
+    private final int[] vecteur;
 
     public Dimension() {
-        int[] dim = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
-        this(dim);
+        int[] vec = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        this(vec);
     }
 
-    public Dimension(int[] dimensions) {
-        this.vecteur = dimensions;
+    /**
+     * Ce constructeur permet de créer les dimensions de chaque unité,
+     * aidant à vérifier si deux unités sont compatibles.
+     * Chaque espace (position) du vecteur définit l'une des 7 dimensions
+     * proposées par le SI, plus une dimension pour la monnaie.
+     * [LONGUEUR, MASSE, TEMPS, COURANT, TEMPERATURE, SUBSTANCE, INTENSITE, MONNAIE]
+     * <br>
+     * Exemple :
+     * <ul>
+     *     <li>[1, 0, 0, 0, 0, 0, 0, 0] : permettra de représenter une unité de longueur.</li>
+     *     <li>[1, 0, -1, 0, 0, 0, 0, 0] : permettra de représenter une unité de vitesse (m.s<sup>-1</sup>).</li>
+     * </ul>
+     * @param vecteur tableau de 8 entiers pour chacun des espaces du vecteur.
+     */
+    public Dimension(int[] vecteur) {
+        if (vecteur == null || vecteur.length != Dimension.SIZE)
+            throw new IllegalArgumentException("Le vecteur dimensionnel doit contenir " + Dimension.SIZE + " éléments.");
+        this.vecteur = Arrays.copyOf(vecteur, Dimension.SIZE);
     }
 
+    /**
+     * Getter permettant de récupérer le vecteur de dimension.
+     * @return le vecteur de dimension
+     */
     public int[] getVecteur() {
         return this.vecteur;
     }
 
+    /**
+     * Cette méthode permet de déterminer si une dimension est simple.
+     * Note : Une dimension simple contient au plus un espace de valeur <b>1</b> dans son vecteur.
+     * @return <b>Vrai</b> si la dimension est simple.
+     */
+    public boolean estSimple() {
+        int nbDim = 0;
+        for (int i = 0; i < this.vecteur.length; i++)
+            if (this.vecteur[i] != 0)
+                nbDim += Math.abs(this.vecteur[i]);
+        return nbDim == 1;
+    }
+
+    /**
+     * Cette méthode permet de vérifier si deux dimensions ont des vecteurs égaux.
+     * @param autre La deuxième dimension à comparer.
+     * @return Vraie si les deux dimensions sont égales.
+     */
+    public boolean estMemeDimension(Dimension autre) {
+        return Arrays.equals(this.vecteur, autre.vecteur);
+    }
+
+    /**
+     * Cette méthode permet de récupérer
+     * @param grandeur
+     * @return la puissance de la dimension concernée.
+     */
+    public int getPuissance(SI grandeur) {
+        return this.vecteur[grandeur.ordinal()];
+    }
+
+    /**
+     * Cette méthode permet de multiplier deux vecteurs.
+     * @param autre Le deuxième vecteur.
+     * @return Le nouveau vecteur obtenu.
+     */
+    public Dimension multiplier(Dimension autre) {
+        int[] resultat = new int[Dimension.SIZE];
+        for (int i = 0; i < Dimension.SIZE; i++)
+            resultat[i] = this.vecteur[i] + autre.vecteur[i];
+
+        return new Dimension(resultat);
+    }
+
+    /**
+     * Cette méthode permet de diviser deux vecteurs.
+     * @param autre Le deuxième vecteur.
+     * @return Le nouveau vecteur obtenu.
+     */
+    public Dimension diviser(Dimension autre) {
+        int[] resultat = new int[Dimension.SIZE];
+        for (int i = 0; i < Dimension.SIZE; i++)
+            resultat[i] = this.vecteur[i] - autre.vecteur[i];
+
+        return new Dimension(resultat);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
@@ -29,7 +109,7 @@ public class Dimension {
     @Override
     public String toString() {
         String symbole = "";
-        symbole += "";
+        symbole += Arrays.toString(vecteur);
         return symbole;
     }
 }
