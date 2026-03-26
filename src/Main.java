@@ -1,7 +1,5 @@
-import base.Dimension;
-import base.Quantite;
-import base.UniteComposee;
-import base.UniteSimple;
+import base.*;
+import design_patterns.visiteur.SimplificateurVisiteur;
 import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
@@ -10,33 +8,27 @@ public class Main {
         System.out.println("=== TEST DU SYSTÈME DE CONVERSION ===\n");
 
         try {
-            // Dimensions
-            Dimension dimLong = new Dimension(new int[]{1, 0, 0, 0, 0, 0, 0, 0});
-            Dimension dimSurf = new Dimension(new int[]{2, 0, 0, 0, 0, 0, 0, 0});
+            SimplificateurVisiteur visiteur = new SimplificateurVisiteur();
+            Unite km = new UniteSimple("km", Dimension.simple(0), 1000.);
+            Unite s = new UniteSimple("s", Dimension.simple(2), 1.);
+            Unite m = new UniteSimple("m", Dimension.simple(0), 1.);
 
-            // Unités simples
-            UniteSimple m = new UniteSimple("m", "mètre", dimLong, 1.0);
-            UniteSimple km = new UniteSimple("km", "kilomètre", dimLong, 1000.0);
+            Unite km_s = new UniteDerivee(km.getDimension().diviser(s.getDimension()), km.getTauxConversion()/s.getTauxConversion());
+            Unite m_s = new UniteDerivee(m.getDimension().diviser(s.getDimension()), m.getTauxConversion()/s.getTauxConversion());
 
-            // Test 1 : km -> m
-            Quantite q1 = new Quantite(2.0, km);
-            System.out.println("Test 1 : " + q1 + " = " + q1.convertirVers(m));
+            System.out.println(km_s);
+            System.out.println(m_s);
 
-            // Test 2 : km² -> m² (Unité composée)
-            UniteComposee km2 = new UniteComposee("km²", "kilomètre carré", dimSurf);
-            km2.ajouterUnite(km, 2); // C'est ici que le '2' est vital
+            Quantite q1 = new Quantite(1000, km_s);
+            Quantite q2 = new Quantite(350, m_s);
 
-            UniteComposee m2 = new UniteComposee("m²", "mètre carré", dimSurf);
-            m2.ajouterUnite(m, 2);
+            Quantite q3 = q1.addition(q2);
 
-            Quantite surface = new Quantite(1.0, km2);
-            System.out.println("Test 2 : " + surface + " = " + surface.convertirVers(m2));
-            // Résultat attendu : 1 000 000 m²
+            System.out.println(q1 + " + " + q2 + " = " + q3);
+            System.out.println(q3.convertirVers(m_s));
 
-        } catch (UniteIllegaleException e) {
+        } catch (DimensionIllegaleException | UniteIllegaleException e) {
             System.err.println(e.getMessage());
-        } catch (DimensionIllegaleException dim_e) {
-            System.err.println(dim_e.getMessage());
         }
     }
 }

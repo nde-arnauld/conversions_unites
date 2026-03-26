@@ -1,12 +1,18 @@
 package base;
 
+import java.util.Arrays;
+
 public enum SI {
-    LONGUEUR,
-    MASSE,
-    TEMPS,
-    COURANT,
-    TEMPERATURE,
-    SUBSTANCE,
-    INTENSITE,
-    MONNAIE
+    LONGUEUR("m"),
+    MASSE("kg"),
+    TEMPS("s"),
+    COURANT("A"),
+    TEMPERATURE("K"),
+    SUBSTANCE("mol"),
+    INTENSITE("cd"),
+    MONNAIE("€");
+
+    private String symbole;
+    private SI(String symbole) { this.symbole = symbole; }
+    public String getSymbole() { return this.symbole; }
 }
