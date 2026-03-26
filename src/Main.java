@@ -7,28 +7,27 @@ public class Main {
         System.out.println("=== TEST DU SYSTÈME DE CONVERSION ===\n");
 
         try {
-            Dimension dimMasse = new Dimension(new int[]{0, 1, 0, 0, 0, 0, 0, 0});
-            Dimension dimPrix = new Dimension(new int[]{0, 0, 0, 0, 0, 0, 0, 1});
+            Unite km = new UniteSimple("km", Dimension.parIndice(0), 1000.);
+            Unite m = new UniteSimple("m", Dimension.parIndice(0), 1.);
+            Unite s = new UniteSimple("s", Dimension.parIndice(2), 1.);
 
-            // Dimension dérivée : Prix/Masse (ex : €/kg)
-            Dimension dimPrixMasse = dimPrix.diviser(dimMasse); // [0, -1, 0, 0, 0, 0, 0, 1]
+            UniteComposee km_s = new UniteComposee();
+            km_s.ajouterUnite(km, 1);
+            km_s.ajouterUnite(s, -1);
 
-            // Unités
-            UniteSimple kg = new UniteSimple("kg", "kilogramme", dimMasse, 1.0);
-            UniteSimple eur = new UniteSimple("€", "euro", dimPrix, 1.0);
+            UniteComposee m_s = new UniteComposee();
+            m_s.ajouterUnite(m, 1);
+            m_s.ajouterUnite(s, -1);
 
-            UniteComposee eurParKg = new UniteComposee("€/kg", "euro par kilogramme", dimPrixMasse);
-            eurParKg.ajouterUnite(eur, 1);
-            eurParKg.ajouterUnite(kg, -1);
+            Quantite q1 = new Quantite(100, km_s);
+            Quantite q2 = new Quantite(30, m);
 
-            // Opération : Prix = Pu * Masse
-            Quantite pu = new Quantite(2.5, eurParKg);
-            Quantite masse = new Quantite(0.7, eurParKg);
+            Quantite q3 = q1.division(q2);
 
-            Quantite prixTotal = pu.multiplication(masse);
-            prixTotal.aff_vecteur();
-            System.out.println("Calcul : " + pu + " * " + masse + " = " + prixTotal);
-            // Le résultat affichera 1.75 €/kg.kg
+            System.out.println(q1 + " / " + q2 + " = " + q3);
+            q1.aff_vecteur();
+            q2.aff_vecteur();
+            q3.aff_vecteur();
         } catch (DimensionIllegaleException dim_e) {
             System.err.println(dim_e.getMessage());
         } catch (UniteIllegaleException e) {

@@ -47,38 +47,15 @@ public class Quantite {
 
     public Quantite multiplication(Quantite autre) throws DimensionIllegaleException, UniteIllegaleException {
         double resultat = this.valeur * autre.valeur;
-        Dimension nDim = this.unite.getDimension().multiplier(autre.unite.getDimension());
-        Unite nUnite;
-        if (!nDim.estSimple()) {
-            UniteComposee nUniteComposee = new UniteComposee(this.unite.getSymbole() + "." + autre.unite.getSymbole(),
-                    this.unite.getNom() + "." + autre.unite.getNom(), nDim);
-            nUniteComposee.ajouterUnite(this.unite, 1);
-            nUniteComposee.ajouterUnite(autre.unite, 1);
-            nUnite = nUniteComposee;
-        } else {
-            nUnite = new UniteSimple(this.unite.getSymbole() + "." + autre.unite.getSymbole(),
-                    this.unite.getNom() + "." + autre.unite.getNom(), nDim, 1.0);
-        }
-        nUnite.accepteVisiteur(new SimplificateurVisiteur());
-        return new Quantite(resultat, nUnite);
+        UniteComposee u = UniteComposee.multiplier(this.unite, autre.unite);
+        return new Quantite(resultat, u);
     }
 
     public Quantite division(Quantite autre) throws DimensionIllegaleException, UniteIllegaleException {
         double resultat = this.valeur / autre.valeur;
-        Dimension nDim = this.unite.getDimension().diviser(autre.unite.getDimension());
+        UniteComposee u = UniteComposee.diviser(this.unite, autre.unite);
 
-        Unite nUnite;
-        if (!nDim.estSimple()) {
-            UniteComposee nUniteComposee = new UniteComposee(this.unite.getSymbole() + "/" + autre.unite.getSymbole(),
-                    this.unite.getNom() + "." + autre.unite.getNom(), nDim);
-            nUniteComposee.ajouterUnite(this.unite, 1);
-            nUniteComposee.ajouterUnite(autre.unite, -1);
-            nUnite = nUniteComposee;
-        }
-        else nUnite = new UniteSimple(this.unite.getSymbole() + "." + autre.unite.getSymbole(),
-                this.unite.getNom() + "." + autre.unite.getNom(), nDim, 1.0);
-        nUnite.accepteVisiteur(new SimplificateurVisiteur());
-        return new Quantite(resultat, nUnite);
+        return new Quantite(resultat, u);
     }
 
     public void aff_vecteur() {

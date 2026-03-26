@@ -7,13 +7,11 @@ import java.util.Arrays;
 
 public abstract class Unite {
     protected String symbole;
-    protected String nom;
     protected Dimension dimension;
-    public abstract double getTauxConversion(); // Taux par rapport à l'unité de référence du SI.
+    protected double tauxConversion;
 
-    public Unite(String symbole, String nom, Dimension dimension) {
+    public Unite(String symbole, Dimension dimension) {
         this.symbole = symbole;
-        this.nom = nom;
         this.dimension = dimension;
     }
 
@@ -24,7 +22,6 @@ public abstract class Unite {
         return this.symbole;
     }
     public void setSymbole(String symbole) { this.symbole = symbole; }
-    public String getNom() { return this.nom; }
 
     public double convertirVers(Unite cible) throws UniteIllegaleException {
         if (!this.dimension.estMemeDimension(cible.dimension))
@@ -32,6 +29,7 @@ public abstract class Unite {
         return this.getTauxConversion() / cible.getTauxConversion();
     }
 
+    public abstract double getTauxConversion(); // Taux par rapport à l'unité de référence du SI.
     public abstract void accepteVisiteur(Visiteur visiteur) throws UniteIllegaleException;
 
     @Override

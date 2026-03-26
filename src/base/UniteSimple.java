@@ -5,16 +5,15 @@ import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
 public class UniteSimple extends Unite {
-    double tauxConversion;
 
     public UniteSimple() throws DimensionIllegaleException {
-        this("", "", new Dimension(), 1.);
+        this("", new Dimension(), 1.);
     }
 
-    public UniteSimple(String symbole, String nom, Dimension dimension, double taux) throws DimensionIllegaleException {
+    public UniteSimple(String symbole, Dimension dimension, double taux) throws DimensionIllegaleException {
         if (!dimension.estSimple())
             throw new DimensionIllegaleException("Erreur d'instanciation: Une unité simple n'a pas de valeur de dimension > 1.");
-        super(symbole, nom, dimension);
+        super(symbole, dimension);
         this.tauxConversion = taux;
     }
 

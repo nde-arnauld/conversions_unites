@@ -33,6 +33,12 @@ public class Dimension {
         this.vecteur = Arrays.copyOf(vecteur, Dimension.SIZE);
     }
 
+    public static Dimension parIndice(int indice) {
+        int[] vec = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        vec[indice] = 1;
+        return new Dimension(vec);
+    }
+
     /**
      * Getter permettant de récupérer le vecteur de dimension.
      * @return le vecteur de dimension
@@ -95,6 +101,13 @@ public class Dimension {
         for (int i = 0; i < Dimension.SIZE; i++)
             resultat[i] = this.vecteur[i] - autre.vecteur[i];
 
+        return new Dimension(resultat);
+    }
+
+    public Dimension puissance(int n) {
+        int[] resultat = new int[Dimension.SIZE];
+        for (int i = 0; i < Dimension.SIZE; i++)
+            resultat[i] = this.vecteur[i] * n;
         return new Dimension(resultat);
     }
 
