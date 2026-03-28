@@ -1,7 +1,6 @@
 package base;
 
 import design_patterns.visiteur.Visiteur;
-import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
 import java.util.Collections;
@@ -13,14 +12,13 @@ public class UniteComposee extends Unite {
 
     /**
      * Constructeur par défaut
-     * @throws DimensionIllegaleException
      */
-    public UniteComposee() throws DimensionIllegaleException {
+    public UniteComposee() {
         super("", new Dimension());
     }
 
     /**
-     * Contructeur prenant un ensemble d'unité et leur exposant respectif.
+     * Constructeur prenant un ensemble d'unité et leur exposant respectif.
      * @param unites L'ensemble des unités composantes de l'unité composée.
      */
     public UniteComposee(Map<Unite, Integer> unites) {
@@ -36,11 +34,11 @@ public class UniteComposee extends Unite {
         Dimension dim = new Dimension();
         double taux = 1.0;
         for (Map.Entry<Unite, Integer> entree : this.composantes.entrySet()) {
-            Unite u = entree.getKey();
+            Unite unite = entree.getKey();
             int puissance = entree.getValue();
 
-            dim = dim.multiplier(u.getDimension().puissance(puissance));
-            taux *= Math.pow(u.getTauxConversion(), puissance);
+            dim = dim.multiplier(unite.getDimension().puissance(puissance));
+            taux *= Math.pow(unite.getTauxConversion(), puissance);
         }
         this.dimension = dim;
         this.tauxConversion = taux;
@@ -53,26 +51,26 @@ public class UniteComposee extends Unite {
      */
     private String genererSymbole() {
         if (this.composantes.isEmpty()) return "Sans unité.";
-        String numerateur = "";
-        String denominateur = "";
+        StringBuilder numerateur = new StringBuilder();
+        StringBuilder denominateur = new StringBuilder();
 
         for (Map.Entry<Unite, Integer> entree : this.composantes.entrySet()) {
             String symbole = entree.getKey().getSymbole();
             int puissance = entree.getValue();
             if (puissance > 0) {
-                if (numerateur.length() > 0) numerateur += ".";
-                numerateur += symbole;
-                if (puissance > 1) numerateur += "^" + puissance;
+                if (!numerateur.isEmpty()) numerateur.append(".");
+                numerateur.append(symbole);
+                if (puissance > 1) numerateur.append("^").append(puissance);
             } else if (puissance < 0) {
-                if (denominateur.length() > 0) denominateur += ".";
-                denominateur += symbole;
-                if (puissance < -1) denominateur += "^" + Math.abs(puissance);
+                if (!denominateur.isEmpty()) denominateur.append(".");
+                denominateur.append(symbole);
+                if (puissance < -1) denominateur.append("^").append(Math.abs(puissance));
             }
         }
-        if (numerateur.length() == 0) numerateur += "1";
-        if (denominateur.length() > 0)
+        if (numerateur.isEmpty()) numerateur.append("1");
+        if (!denominateur.isEmpty())
             return numerateur + "/" + denominateur;
-        return numerateur;
+        return numerateur.toString();
     }
 
     /**
@@ -81,12 +79,12 @@ public class UniteComposee extends Unite {
      * @return Le dictionnaire des unités nettoyé.
      */
     private Map<Unite, Integer> nettoyerComposantes(Map<Unite, Integer> map) {
-        Map<Unite, Integer> finalMap = new HashMap<>();
+        Map<Unite, Integer> mapFinale = new HashMap<>();
         for (Map.Entry<Unite, Integer> entree : map.entrySet()) {
             if (entree.getValue() != 0)
-                finalMap.put(entree.getKey(), entree.getValue());
+                mapFinale.put(entree.getKey(), entree.getValue());
         }
-        return finalMap;
+        return mapFinale;
     }
 
     @Override
@@ -115,20 +113,11 @@ public class UniteComposee extends Unite {
     private boolean detecterCycle(Unite cible) {
         if (this == cible) return true;
         if (cible instanceof  UniteComposee) {
-            for (Unite enfant : ((UniteComposee) cible).getComposants().keySet()) {
+            for (Unite enfant : cible.getMapComposantes().keySet()) {
                 if (detecterCycle(enfant)) return true;
             }
         }
         return false;
-    }
-
-    /**
-     * Cette méthode retourne une <b>vue</b> de la map.
-     * Cette vue n'est pas modifiable.
-     * @return Une vue sur la map.
-     */
-    public Map<Unite, Integer> getComposants() {
-        return Collections.unmodifiableMap(this.composantes);
     }
 
     @Override
@@ -136,11 +125,54 @@ public class UniteComposee extends Unite {
         return this.tauxConversion;
     }
 
-    public static UniteComposee multiplier(Unite u1, Unite u2) throws UniteIllegaleException {
+    /**
+     * Cette méthode retourne une <b>vue</b> de la liste des unités composantes cette actuelle.
+     * Cette vue n'est pas modifiable.
+     * @return Une vue sur la map des.
+     */
+    @Override
+    public Map<Unite, Integer> getMapComposantes() {
+        return Collections.unmodifiableMap(this.composantes);
+    }
+
+    /**
+     * Cette méthode permet de conserver une liste de toutes les unités de même
+     * dimension que celles présentent dans l'unité actuelle pour pouvoir effectuer
+     * des simplifications plus tard. <br>
+     * Exemple : <br>
+     * - Unité actuelle : m <br>
+     * - Unité modèle : km/s <br>
+     * L'unité 'km' du modèle sera retournée, car elle est de même dimension que 'm'.
+     * Cela permettra de conserver uniquement 'km' dans l'unité finale.
+     * @param modele L'unité de référence.
+     * @return La liste des unités de même dimension que l'unité actuelle.
+     */
+    @Override
+    public Unite alignerSur(Unite modele) {
+        UniteComposee nouvelleUnite = new UniteComposee();
+        Map<Unite, Integer> composantesModele = modele.getMapComposantes();
+
+        for (Map.Entry<Unite, Integer> entree : this.composantes.entrySet()) {
+            Unite uniteActuelle = entree.getKey();
+            int puissance = entree.getValue();
+
+            Unite uniteMatch = uniteActuelle;
+            for (Unite uniteModele : composantesModele.keySet()) {
+                if (uniteModele.getDimension().equals(uniteActuelle.getDimension())) {
+                    uniteMatch = uniteModele;
+                    break;
+                }
+            }
+            nouvelleUnite.ajouterUnite(uniteMatch, puissance);
+        }
+        return nouvelleUnite;
+    }
+
+    public static UniteComposee multiplier(Unite u1, Unite u2) {
         return combiner(u1, u2, 1);
     }
 
-    public static UniteComposee diviser(Unite u1, Unite u2) throws UniteIllegaleException {
+    public static UniteComposee diviser(Unite u1, Unite u2) {
         return combiner(u1, u2, -1);
     }
 

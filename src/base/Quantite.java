@@ -31,6 +31,7 @@ public class Quantite {
         return new Quantite(resultat, cible);
     }
 
+    /*
     public Quantite addition(Quantite autre) throws UniteIllegaleException {
         if (!this.unite.getDimension().estMemeDimension(autre.unite.getDimension()))
             throw new UniteIllegaleException("Addition impossible : les grandeurs sont incompatibles.");
@@ -56,6 +57,43 @@ public class Quantite {
         UniteComposee u = UniteComposee.diviser(this.unite, autre.unite);
 
         return new Quantite(resultat, u);
+    }
+    */
+
+    public Quantite addition(Quantite autre) throws UniteIllegaleException, DimensionIllegaleException {
+        if (!this.unite.getDimension().equals(autre.unite.getDimension()))
+            throw new UniteIllegaleException("Addition impossible : les grandeurs sont incompatibles.");
+        Quantite operateurDroite = autre.alignerSur(this.unite);
+        return new Quantite(this.valeur + operateurDroite.valeur, this.unite);
+    }
+
+    public Quantite soustraction(Quantite autre) throws UniteIllegaleException, DimensionIllegaleException {
+        if (!this.unite.getDimension().equals(autre.unite.getDimension()))
+            throw new UniteIllegaleException("Soustraction impossible : les grandeurs sont incompatibles.");
+        Quantite operateurDroite = autre.alignerSur(this.unite);
+        return new Quantite(this.valeur - operateurDroite.valeur, this.unite);
+    }
+
+    public Quantite multiplication(Quantite autre) throws DimensionIllegaleException, UniteIllegaleException {
+        Quantite operateurDroite = autre.alignerSur(this.unite);
+
+        double resultat = this.valeur * operateurDroite.valeur;
+        UniteComposee u = UniteComposee.multiplier(this.unite, operateurDroite.unite);
+        return new Quantite(resultat, u);
+    }
+
+    public Quantite division(Quantite autre) throws DimensionIllegaleException, UniteIllegaleException {
+        Quantite operateurDroite = autre.alignerSur(this.unite);
+
+        double resultat = this.valeur / operateurDroite.valeur;
+        UniteComposee u = UniteComposee.multiplier(this.unite, operateurDroite.unite);
+        return new Quantite(resultat, u);
+    }
+
+    public Quantite alignerSur(Unite modele) throws DimensionIllegaleException, UniteIllegaleException {
+        Unite nouvelleUnite = this.unite.alignerSur(modele);
+        double taux = this.unite.convertirVers(nouvelleUnite);
+        return new Quantite(this.valeur * taux, nouvelleUnite);
     }
 
     public void aff_vecteur() {

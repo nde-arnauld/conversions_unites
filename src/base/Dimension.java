@@ -8,6 +8,9 @@ public class Dimension {
     public static int SIZE = 8;
     private final int[] vecteur;
 
+    /**
+     * Constructeur par défaut.
+     */
     public Dimension() {
         int[] vec = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
         this(vec);
@@ -33,6 +36,11 @@ public class Dimension {
         this.vecteur = Arrays.copyOf(vecteur, Dimension.SIZE);
     }
 
+    /**
+     * Ce constructeur permet de créer une dimension en mettant
+     * @param indice
+     * @return
+     */
     public static Dimension parIndice(int indice) {
         int[] vec = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
         vec[indice] = 1;
@@ -61,24 +69,6 @@ public class Dimension {
     }
 
     /**
-     * Cette méthode permet de vérifier si deux dimensions ont des vecteurs égaux.
-     * @param autre La deuxième dimension à comparer.
-     * @return Vraie si les deux dimensions sont égales.
-     */
-    public boolean estMemeDimension(Dimension autre) {
-        return Arrays.equals(this.vecteur, autre.vecteur);
-    }
-
-    /**
-     * Cette méthode permet de récupérer
-     * @param grandeur
-     * @return la puissance de la dimension concernée.
-     */
-    public int getPuissance(SI grandeur) {
-        return this.vecteur[grandeur.ordinal()];
-    }
-
-    /**
      * Cette méthode permet de multiplier deux vecteurs.
      * @param autre Le deuxième vecteur.
      * @return Le nouveau vecteur obtenu.
@@ -104,6 +94,11 @@ public class Dimension {
         return new Dimension(resultat);
     }
 
+    /**
+     * Cette méthode permet d'appliquer la puissance à une dimension.
+     * @param n L'exposant à appliquer
+     * @return La nouvelle dimension obtenue
+     */
     public Dimension puissance(int n) {
         int[] resultat = new int[Dimension.SIZE];
         for (int i = 0; i < Dimension.SIZE; i++)

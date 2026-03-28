@@ -62,7 +62,7 @@ public class SimplificateurVisiteur implements Visiteur {
                 int puissance = 0;
                 String sym = "";
                 // On recherche cette unité dans la liste
-                for (Map.Entry<Unite, Integer> unite: uniteComposee.getComposants().entrySet()) {
+                for (Map.Entry<Unite, Integer> unite: uniteComposee.getMapComposantes().entrySet()) {
                     Unite u = unite.getKey();
                     int p = unite.getValue();
                     if (u.getDimension().getVecteur()[i] != 0) {
