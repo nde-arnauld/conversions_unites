@@ -1,42 +1,33 @@
-import base.Dimension;
-import base.Quantite;
-import base.UniteComposee;
-import base.UniteSimple;
+import base.*;
 import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("=== TEST DU SYSTÈME DE CONVERSION ===\n");
+void main() {
+    System.out.println("=== TEST DU SYSTÈME DE CONVERSION ===\n");
 
-        try {
-            // Dimensions
-            Dimension dimLong = new Dimension(new int[]{1, 0, 0, 0, 0, 0, 0, 0});
-            Dimension dimSurf = new Dimension(new int[]{2, 0, 0, 0, 0, 0, 0, 0});
+    try {
+        Unite km = UniteSimple.deLongueur("km", 1000.);
+        Unite m = UniteSimple.metre();
+        Unite s = UniteSimple.seconde();
+        Unite min = UniteSimple.deTemps("min", 60.);
 
-            // Unités simples
-            UniteSimple m = new UniteSimple("m", "mètre", dimLong, 1.0);
-            UniteSimple km = new UniteSimple("km", "kilomètre", dimLong, 1000.0);
+        UniteComposee km_s = new UniteComposee();
+        km_s.ajouterUnite(km, 1);
+        km_s.ajouterUnite(s, -1);
 
-            // Test 1 : km -> m
-            Quantite q1 = new Quantite(2.0, km);
-            System.out.println("Test 1 : " + q1 + " = " + q1.convertirVers(m));
+        UniteComposee m_min = new UniteComposee();
+        m_min.ajouterUnite(m, 1);
+        m_min.ajouterUnite(min, -1);
 
-            // Test 2 : km² -> m² (Unité composée)
-            UniteComposee km2 = new UniteComposee("km²", "kilomètre carré", dimSurf);
-            km2.ajouterUnite(km, 2); // C'est ici que le '2' est vital
+        Quantite q1 = new Quantite(100, km_s);
+        Quantite q2 = new Quantite(60, m_min);
 
-            UniteComposee m2 = new UniteComposee("m²", "mètre carré", dimSurf);
-            m2.ajouterUnite(m, 2);
+        Quantite q3 = q1.multiplication(q2);
 
-            Quantite surface = new Quantite(1.0, km2);
-            System.out.println("Test 2 : " + surface + " = " + surface.convertirVers(m2));
-            // Résultat attendu : 1 000 000 m²
-
-        } catch (UniteIllegaleException e) {
-            System.err.println(e.getMessage());
-        } catch (DimensionIllegaleException dim_e) {
-            System.err.println(dim_e.getMessage());
-        }
+        IO.println(q1 + " / " + q2 + " = " + q3);
+    } catch (DimensionIllegaleException dim_e) {
+        System.err.println(dim_e.getMessage());
+    } catch (UniteIllegaleException e) {
+        throw new RuntimeException(e);
     }
 }
