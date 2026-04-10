@@ -1,6 +1,7 @@
 package base;
 
 import design_patterns.visiteur.Visiteur;
+import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
 import java.util.Collections;
@@ -17,6 +18,11 @@ public class UniteComposee extends Unite {
         super("", new Dimension());
     }
 
+    public UniteComposee(UniteComposee uniteComposee, double taux) {
+        this(uniteComposee.composantes);
+        this.tauxConversion = taux;
+    }
+
     /**
      * Constructeur prenant un ensemble d'unité et leur exposant respectif.
      * @param unites L'ensemble des unités composantes de l'unité composée.
@@ -25,6 +31,31 @@ public class UniteComposee extends Unite {
         super("", new Dimension());
         this.composantes = nettoyerComposantes(unites);
         miseAjourPropriete();
+    }
+
+    /**
+     * Ce constructeur permet de créer une unité simple à partir d'une autre unité simple.
+     * @param symbole Le symbole de l'unité (km, g, h)
+     * @param taux Le facteur par lequel il doit être multiplié pour revenir à l'unité de base de référence.
+     * @param uniteReference L'unité sur laquelle s'appuie la nouvelle unité.
+     * @throws DimensionIllegaleException
+     * <br>Exemple : <br>
+     * Pour créer une unité comme le Gallon (gal) qui a pour référence le litre (l).
+     * <br>On commence par créer le volume (m<sup>3</sup>).
+     * <pre>{@code
+     *      // Création du mètre
+     *     Unite m = UniteSimple.metre();
+     *     // Création du litre 1 l => 1/1000 m^3
+     *     Unite litre = new UniteSimple("l", 0.001, m.getDimension().puissance(3));
+     *     //Création du gallon 1 gal => 3.78541 l
+     *     Unite gallon = new UniteSimple("gal", 3.78541, litre);
+     *     }
+     * </pre>
+     */
+    public UniteComposee(String symbole, double taux, Unite uniteReference) throws DimensionIllegaleException {
+        this((UniteComposee) uniteReference, 0.);
+        this.tauxConversion = taux * uniteReference.getTauxConversion();
+        this.symbole = symbole;
     }
 
     /**
