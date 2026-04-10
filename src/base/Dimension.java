@@ -57,14 +57,17 @@ public class Dimension {
 
     /**
      * Cette méthode permet de déterminer si une dimension est simple.
-     * Note : Une dimension simple contient au plus un espace de valeur <b>1</b> dans son vecteur.
+     * Note : Une dimension simple contient au plus un espace de valeur dans son vecteur.
      * @return <b>Vrai</b> si la dimension est simple.
+     * <br>Exemple:
+     * <br>m^3 → [3, 0, 0, 0, 0, 0, 0, 0]
+     * <br>$ → [0, 0, 0, 0, 0, 0, 0, 1]
      */
     public boolean estSimple() {
         int nbDim = 0;
         for (int i = 0; i < this.vecteur.length; i++)
             if (this.vecteur[i] != 0)
-                nbDim += Math.abs(this.vecteur[i]);
+                nbDim += 1;
         return nbDim == 1;
     }
 
@@ -119,5 +122,10 @@ public class Dimension {
         String symbole = "";
         symbole += Arrays.toString(vecteur);
         return symbole;
+    }
+
+    @Override
+    public  int hashCode() {
+        return Arrays.hashCode(this.vecteur);
     }
 }

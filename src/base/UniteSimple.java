@@ -17,9 +17,32 @@ public class UniteSimple extends Unite {
      */
     public UniteSimple(String symbole, Dimension dimension, double taux) throws DimensionIllegaleException {
         if (!dimension.estSimple())
-            throw new DimensionIllegaleException("Erreur d'instanciation: Une unité simple n'a pas de valeur de dimension > 1.");
+            throw new DimensionIllegaleException("Erreur d'instanciation: Une unité simple n'a pas plus d'une valeur de dimension > 1.");
         super(symbole, dimension);
         this.tauxConversion = taux;
+    }
+
+    /**
+     * Ce constructeur permet de créer une unité simple à partir d'une autre unité simple.
+     * @param symbole Le symbole de l'unité (km, g, h)
+     * @param taux Le facteur par lequel il doit être multiplié pour revenir à l'unité de base de référence.
+     * @param uniteReference L'unité sur laquelle s'appuie la nouvelle unité.
+     * @throws DimensionIllegaleException
+     * <br>Exemple : <br>
+     * Pour créer une unité comme le Gallon (gal) qui a pour référence le litre (l).
+     * <br>On commence par créer le volume (m<sup>3</sup>).
+     * <pre>{@code
+     *      // Création du mètre
+     *     Unite m = UniteSimple.metre();
+     *     // Création du litre 1 l => 1/1000 m^3
+     *     Unite litre = new UniteSimple("l", 0.001, m.getDimension().puissance(3));
+     *     //Création du gallon 1 gal => 3.78541 l
+     *     Unite gallon = new UniteSimple("gal", 3.78541, litre);
+     *     }
+     * </pre>
+     */
+    public UniteSimple(String symbole, double taux, Unite uniteReference) throws DimensionIllegaleException {
+        this(symbole, uniteReference.getDimension(), taux * uniteReference.getTauxConversion());
     }
 
     public static UniteSimple metre() throws DimensionIllegaleException {
@@ -50,7 +73,7 @@ public class UniteSimple extends Unite {
         return new UniteSimple(SI.INTENSITE.getSymbole(), Dimension.parIndice(6), 1.);
     }
 
-    public static UniteSimple dollar() throws DimensionIllegaleException {
+    public static UniteSimple euro() throws DimensionIllegaleException {
         return new UniteSimple(SI.MONNAIE.getSymbole(), Dimension.parIndice(7), 1.);
     }
 
