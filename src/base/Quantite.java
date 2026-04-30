@@ -1,11 +1,6 @@
 package base;
-
-import design_patterns.registre.RegistreUnites;
-import design_patterns.visiteur.SimplificateurVisiteur;
 import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
-
-import java.util.Arrays;
 
 public class Quantite {
     private double valeur;
@@ -50,7 +45,7 @@ public class Quantite {
         Quantite operateurDroite = autre.alignerSur(this.unite);
 
         double resultat = this.valeur * operateurDroite.valeur;
-        UniteComposee u = UniteComposee.multiplier(this.unite, operateurDroite.unite);
+        UniteComposee u = OperationsUnites.multiplier(this.unite, operateurDroite.unite);
         return new Quantite(resultat, u);
     }
 
@@ -58,23 +53,18 @@ public class Quantite {
         Quantite operateurDroite = autre.alignerSur(this.unite);
 
         double resultat = this.valeur / operateurDroite.valeur;
-        UniteComposee u = UniteComposee.multiplier(this.unite, operateurDroite.unite);
+        UniteComposee u = OperationsUnites.diviser(this.unite, operateurDroite.unite);
         return new Quantite(resultat, u);
     }
 
-    public Quantite alignerSur(Unite modele) throws DimensionIllegaleException, UniteIllegaleException {
-        Unite nouvelleUnite = this.unite.alignerSur(modele);
+    public Quantite alignerSur(Unite modele) throws UniteIllegaleException {
+        Unite nouvelleUnite = OperationsUnites.aligner(this.unite, modele);
         double taux = this.unite.convertirVers(nouvelleUnite);
         return new Quantite(this.valeur * taux, nouvelleUnite);
     }
 
     @Override
     public String toString() {
-        String symboleCompact = RegistreUnites.trouverSymbole(this.unite.getDimension());
-        if (symboleCompact != null) {
-            double valeurNormalisee = this.valeur * this.unite.getTauxConversion();
-            return String.format("%g %s", valeurNormalisee, symboleCompact);
-        }
         return String.format("%g %s", this.valeur, this.unite);
     }
 }

@@ -1,10 +1,8 @@
 package base;
 
 import design_patterns.visiteur.Visiteur;
-import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
-import java.util.Arrays;
 import java.util.Map;
 
 public abstract class Unite {
@@ -12,9 +10,10 @@ public abstract class Unite {
     protected Dimension dimension;
     protected double tauxConversion;
 
-    public Unite(String symbole, Dimension dimension) {
+    public Unite(String symbole, Dimension dimension, double taux) {
         this.symbole = symbole;
         this.dimension = dimension;
+        this.tauxConversion = taux;
     }
 
     public Dimension getDimension() {
@@ -43,19 +42,6 @@ public abstract class Unite {
      */
     public abstract double getTauxConversion();
     public abstract Map<Unite, Integer> getMapComposantes();
-
-    /**
-     * Cette méthode permet de créer une nouvelle unité qui sera alignée sur l'unité cible.
-     * <ul>
-     *     <b>Exemple</b>:
-     *     <li>Unité actuelle : g</li>
-     *     <li>Unité cible : kg.m/s^2</li>
-     * </ul>
-     * @param modele
-     * @return
-     * @throws UniteIllegaleException
-     */
-    public abstract Unite alignerSur(Unite modele) throws UniteIllegaleException, DimensionIllegaleException;
     public abstract void accepteVisiteur(Visiteur visiteur) throws UniteIllegaleException;
 
     @Override

@@ -1,18 +1,15 @@
 package base;
-
-import exceptions.UniteIllegaleException;
-
 import java.util.Arrays;
 
 public class Dimension {
-    public static int SIZE = 8;
+    public static int SIZE = SI.getNombreDimensions();
     private final int[] vecteur;
 
     /**
      * Constructeur par défaut.
      */
     public Dimension() {
-        int[] vec = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
+        int[] vec = new int[Dimension.SIZE];
         this(vec);
     }
 
@@ -41,9 +38,9 @@ public class Dimension {
      * @param indice
      * @return
      */
-    public static Dimension parIndice(int indice) {
-        int[] vec = new int[] {0, 0, 0, 0, 0, 0, 0, 0};
-        vec[indice] = 1;
+    public static Dimension parIndice(int indice, int degre) {
+        int[] vec = new int[Dimension.SIZE];
+        vec[indice] = degre;
         return new Dimension(vec);
     }
 
