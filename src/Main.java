@@ -1,55 +1,75 @@
 import base.*;
+import design_patterns.registre.RegistreUnites;
 import exceptions.DimensionIllegaleException;
 import exceptions.UniteIllegaleException;
 
-void main() {
-    IO.println("=== TEST DU SYSTÈME DE CONVERSION ===\n");
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-    try {
-        Unite euro = UniteSimple.euro();
-        Unite m = UniteSimple.metre();
-        Unite s = UniteSimple.seconde();
+public class Main {
+    public static void main(String[] args) {
+        IO.println("=== TEST DU SYSTÈME DE CONVERSION ===\n");
 
-        Unite dollar = new UniteSimple("$", 0.92, euro);
-        Unite km = new UniteSimple("km", 1000.0, m);
-        Unite h = new UniteSimple("h", 3600.0, s);
+        try {
+            Unite m3 = UniteSimple.deLongueur("m^3", 1., 3);
+            Unite litre = new UniteSimple("l", 1.0/1000, m3);
+            Unite gallon = new UniteSimple("gal", 3.78541, litre);
+            Unite euro = UniteSimple.deMonnaie("euro", 1.);
+            Unite dollar = UniteSimple.deMonnaie("$", 1/1.17);
 
-        Unite m3 = new UniteSimple("m^3", 1.0, m);
+            Map<Unite, Integer> dolgal = new HashMap<Unite, Integer>();
+            dolgal.put(dollar, 1);
+            dolgal.put(gallon, -1);
+            Unite dollar_gallon = new UniteComposee(dolgal);
 
-        Unite litre = new UniteSimple("l", 0.001, m3);
-        Unite gallon = new UniteSimple("gal", 3.78541, litre);
+            Map<Unite, Integer> eurol = new HashMap<Unite, Integer>();
+            eurol.put(euro, 1);
+            eurol.put(litre, -1);
+            Unite euro_litre = new UniteComposee(eurol);
 
-        Unite dollar_gal = UniteComposee.diviser(dollar, gallon);
-        Unite euro_gal = UniteComposee.diviser(euro, gallon);
-        Unite euro_L = UniteComposee.diviser(euro, litre);
+            Quantite pu = new Quantite(5.2, dollar_gallon);
+            Quantite p = pu.convertirVers(euro_litre);
 
-        Unite m_s = UniteComposee.diviser(m, s);
-        Unite km_h = UniteComposee.diviser(km, h);
+            IO.println(pu + " -> " + p);
 
-        Unite kt = new UniteComposee("kt", 0.514444, m_s);
+            RegistreUnites.vider();
+            RegistreUnites.chargerDepuisFichier("unites.csv");
 
-        // --- EXÉCUTION DES CONVERSIONS ---
+            Unite kmh = recupererOuEchouer("km/h");
+            IO.println("Unité km/h : " + kmh);
+            Unite ms = recupererOuEchouer("m/s");
+            IO.println("Unité m/s : " + ms);
+            Unite s = recupererOuEchouer("s");
+            IO.println("Unité s : " + s);
 
-        IO.println("--- Scénario 1 : Essence  ---");
-        Quantite prixUS = new Quantite(5.2, dollar_gal);
+            IO.println("Scénario 1 : conversion de vitesse");
+            Quantite vitesseKmh = new Quantite(72, kmh);
+            IO.println("Quantité km/h : " + vitesseKmh);
+            Quantite vitesseMs = vitesseKmh.convertirVers(ms);
+            IO.println(vitesseKmh + " = " + vitesseMs + "\n");
 
-        Quantite prixEuroGal = prixUS.convertirVers(euro_gal);
-        Quantite prixEuroLitre = prixUS.convertirVers(euro_L);
+            IO.println("Scénario 2 : distance = vitesse x durée");
+            Quantite vitesse = new Quantite(8, kmh);
+            Quantite duree = new Quantite(18, s);
 
-        IO.println(prixUS + " = " + prixEuroGal);
-        IO.println(prixUS + " = " + prixEuroLitre);
+            Quantite distance = vitesse.multiplication(duree);
+            IO.println(distance);
 
+        } catch (DimensionIllegaleException dim_e) {
+            System.err.println(dim_e.getMessage());
+        } catch (IOException io_e) {
+            System.err.println("Erreur de lecture du fichier d'unités : " + io_e.getMessage());
+        } catch (UniteIllegaleException e) {
+            IO.println(e);
+        }
+    }
 
-        IO.println("\n--- Scénario 2 : Vitesse marine ---");
-        Quantite vitesseMarine = new Quantite(100, kt);
-
-        Quantite vitesseTerre = vitesseMarine.convertirVers(km_h);
-
-        IO.println(vitesseMarine + " = " + vitesseTerre);
-
-    } catch (DimensionIllegaleException dim_e) {
-        System.err.println(dim_e.getMessage());
-    } catch (UniteIllegaleException e) {
-        throw new RuntimeException(e);
+    private static Unite recupererOuEchouer(String symbole) {
+        Unite unite = RegistreUnites.recupererUnite(symbole);
+        if (unite == null) {
+            throw new IllegalStateException("Unité introuvable dans le registre : " + symbole);
+        }
+        return unite;
     }
 }

@@ -11,13 +11,6 @@ import java.util.Map;
 public class UniteComposee extends Unite {
     private Map<Unite, Integer> composantes = new HashMap<>();
 
-    /**
-     * Constructeur par défaut
-     */
-    public UniteComposee() {
-        super("", new Dimension());
-    }
-
     public UniteComposee(UniteComposee uniteComposee, double taux) {
         this(uniteComposee.composantes);
         this.tauxConversion = taux;
@@ -28,14 +21,14 @@ public class UniteComposee extends Unite {
      * @param unites L'ensemble des unités composantes de l'unité composée.
      */
     public UniteComposee(Map<Unite, Integer> unites) {
-        super("", new Dimension());
+        super("", new Dimension(), 0.0);
         this.composantes = nettoyerComposantes(unites);
         miseAjourPropriete();
     }
 
     /**
      * Ce constructeur permet de créer une unité simple à partir d'une autre unité simple.
-     * @param symbole Le symbole de l'unité (km, g, h)
+     * @param symbole Le symbole de l'unité (m/s, g/mol, h)
      * @param taux Le facteur par lequel il doit être multiplié pour revenir à l'unité de base de référence.
      * @param uniteReference L'unité sur laquelle s'appuie la nouvelle unité.
      * @throws DimensionIllegaleException
@@ -44,7 +37,7 @@ public class UniteComposee extends Unite {
      * <br>On commence par créer le volume (m<sup>3</sup>).
      * <pre>{@code
      *      // Création du mètre
-     *     Unite m = UniteSimple.metre();
+     *     Unite m3 = new UniteSimple("m^3", new Dimension(), 1);
      *     // Création du litre 1 l => 1/1000 m^3
      *     Unite litre = new UniteSimple("l", 0.001, m.getDimension().puissance(3));
      *     //Création du gallon 1 gal => 3.78541 l
@@ -53,7 +46,7 @@ public class UniteComposee extends Unite {
      * </pre>
      */
     public UniteComposee(String symbole, double taux, Unite uniteReference) throws DimensionIllegaleException {
-        this((UniteComposee) uniteReference, 0.);
+        this(uniteReference.getMapComposantes());
         this.tauxConversion = taux * uniteReference.getTauxConversion();
         this.symbole = symbole;
     }
@@ -123,34 +116,6 @@ public class UniteComposee extends Unite {
         visiteur.visite(this);
     }
 
-    /**
-     * Cette méthode permet d'ajouter une nouvelle unité dans l'unité composée.
-     * @param unite l'unité à ajouter
-     * @param exposant son exposant
-     */
-    public void ajouterUnite(Unite unite, int exposant) {
-        if (detecterCycle(unite))
-            throw new IllegalArgumentException("Calcul impossible : l'unité '" + unite.getSymbole() + "' créerait une dépendance circulaire.");
-        this.composantes.merge(unite, exposant, Integer::sum);
-        this.composantes = nettoyerComposantes(this.composantes);
-        miseAjourPropriete();
-    }
-
-    /**
-     * Cette méthode permet de détecter si une unité est contenue dans une autre.
-     * @param cible l'unité à détecter
-     * @return Vraie si l'unité est trouvée.
-     */
-    private boolean detecterCycle(Unite cible) {
-        if (this == cible) return true;
-        if (cible instanceof  UniteComposee) {
-            for (Unite enfant : cible.getMapComposantes().keySet()) {
-                if (detecterCycle(enfant)) return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public double getTauxConversion() {
         return this.tauxConversion;
@@ -164,63 +129,5 @@ public class UniteComposee extends Unite {
     @Override
     public Map<Unite, Integer> getMapComposantes() {
         return Collections.unmodifiableMap(this.composantes);
-    }
-
-    /**
-     * Cette méthode permet de conserver une liste de toutes les unités de même
-     * dimension que celles présentent dans l'unité actuelle pour pouvoir effectuer
-     * des simplifications plus tard. <br>
-     * Exemple : <br>
-     * - Unité actuelle : m <br>
-     * - Unité modèle : km/s <br>
-     * L'unité 'km' du modèle sera retournée, car elle est de même dimension que 'm'.
-     * Cela permettra de conserver uniquement 'km' dans l'unité finale.
-     * @param modele L'unité de référence.
-     * @return La liste des unités de même dimension que l'unité actuelle.
-     */
-    @Override
-    public Unite alignerSur(Unite modele) {
-        UniteComposee nouvelleUnite = new UniteComposee();
-        Map<Unite, Integer> composantesModele = modele.getMapComposantes();
-
-        for (Map.Entry<Unite, Integer> entree : this.composantes.entrySet()) {
-            Unite uniteActuelle = entree.getKey();
-            int puissance = entree.getValue();
-
-            Unite uniteMatch = uniteActuelle;
-            for (Unite uniteModele : composantesModele.keySet()) {
-                if (uniteModele.getDimension().equals(uniteActuelle.getDimension())) {
-                    uniteMatch = uniteModele;
-                    break;
-                }
-            }
-            nouvelleUnite.ajouterUnite(uniteMatch, puissance);
-        }
-        return nouvelleUnite;
-    }
-
-    public static UniteComposee multiplier(Unite u1, Unite u2) {
-        return combiner(u1, u2, 1);
-    }
-
-    public static UniteComposee diviser(Unite u1, Unite u2) {
-        return combiner(u1, u2, -1);
-    }
-
-    private  static UniteComposee combiner(Unite u1, Unite u2, int positionU2) {
-        Map<Unite, Integer> map = new HashMap<>();
-        ajouter(map, u1, 1);
-        ajouter(map, u2, positionU2);
-        return new UniteComposee(map);
-    }
-
-    private static void ajouter(Map<Unite, Integer> map, Unite u, int position) {
-        if (u instanceof UniteComposee) {
-            for (Map.Entry<Unite, Integer> entree : ((UniteComposee)u).composantes.entrySet()) {
-                map.merge(entree.getKey(), entree.getValue() * position, Integer::sum);
-            }
-        } else {
-            map.merge(u, position, Integer::sum);
-        }
     }
 }
